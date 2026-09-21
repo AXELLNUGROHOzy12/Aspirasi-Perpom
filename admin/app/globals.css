@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  WARNA SEKOLAH
+  Ganti --brand di bawah (format "R G B") atau set NEXT_PUBLIC_BRAND_RGB di .env.local.
+*/
+:root {
+  --brand: 15 118 110;
+  --bg: 246 248 248;
+  --card: 255 255 255;
+  --ink: 17 24 39;
+  --muted: 92 102 115;
+  --line: 218 224 228;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 10 15 20;
+  --card: 19 27 34;
+  --ink: 236 241 244;
+  --muted: 152 164 175;
+  --line: 44 56 66;
+  color-scheme: dark;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { @apply bg-bg text-ink antialiased; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+  a, button, label, select { -webkit-tap-highlight-color: transparent; }
+  .font-display { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif; }
+}
+
+@layer components {
+  .card { @apply rounded-2xl border border-line bg-card p-4 sm:p-6; }
+  .btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-bg
+      disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary { @apply btn bg-brand text-white hover:brightness-110 active:brightness-95; }
+  .btn-outline { @apply btn border border-line bg-card text-ink hover:border-brand hover:text-brand; }
+  .btn-danger { @apply btn border border-rose-300 bg-card text-rose-700 hover:bg-rose-50 dark:border-rose-500/40 dark:text-rose-300 dark:hover:bg-rose-500/10; }
+  .btn-sm { @apply min-h-10 px-4 text-sm; }
+  .input {
+    @apply block min-h-12 w-full rounded-xl border border-line bg-card px-4 py-3 text-base text-ink placeholder:text-muted
+      focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 disabled:opacity-60;
+  }
+  .label { @apply mb-1.5 block text-sm font-semibold; }
+  .field-error { @apply mt-1.5 text-sm text-rose-700 dark:text-rose-300; }
+  .chip { @apply inline-flex min-h-10 items-center rounded-full border border-line bg-card px-4 text-sm font-medium text-ink transition; }
+  .chip-active { @apply border-brand bg-brand text-white; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

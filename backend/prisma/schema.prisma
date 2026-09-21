@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+}
+
+enum AspirationStatus {
+  PENDING
+  REVIEWING
+  IN_PROGRESS
+  RESOLVED
+  ARCHIVED
+}
+
+enum ModerationStatus {
+  APPROVED
+  NEEDS_REVIEW
+  REJECTED
+}
+
+enum ModerationSource {
+  AUTO
+  ADMIN
+}
+
+model Admin {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String    @map("password_hash")
+  role         AdminRole @default(ADMIN)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  replies        Reply[]
+  statusChanges  StatusHistory[]
+  moderationLogs ModerationLog[]
+  auditLogs      AuditLog[]
+
+  @@map("admins")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  isActive    Boolean @default(true) @map("is_active")
+  sortOrder   Int     @default(0) @map("sort_order")
+  aspirations Aspiration[]
+
+  @@map("categories")
+}
+
+model Aspiration {
+  id               String           @id @default(cuid())
+  // Kode publik untuk tracking. Sengaja terpisah dari id database.
+  code             String           @unique
+  className        String           @map("class_name")
+  authorName       String?          @map("author_name")
+  title            String
+  body             String           @db.Text
+  contentHash      String           @map("content_hash")
+  status           AspirationStatus @default(PENDING)
+  moderationStatus ModerationStatus @default(NEEDS_REVIEW) @map("moderation_status")
+  categoryId       String           @map("category_id")
+  category         Category         @relation(fields: [categoryId], references: [id])
+  // Data teknis untuk anti-spam saja (IP disimpan sebagai hash, bukan alamat asli)
+  ipHash           String?          @map("ip_hash")
+  userAgent        String?          @map("user_agent")
+  archivedAt       DateTime?        @map("archived_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  attachments    Attachment[]
+  replies        Reply[]
+  statusHistory  StatusHistory[]
+  moderationLogs ModerationLog[]
+
+  @@index([status])
+  @@index([moderationStatus])
+  @@index([categoryId])
+  @@index([className])
+  @@index([createdAt])
+  @@index([contentHash])
+  @@index([ipHash, createdAt])
+  @@map("aspirations")
+}
+
+model Attachment {
+  id           String     @id @default(cuid())
+  aspirationId String     @map("aspiration_id")
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id], onDelete: Cascade)
+  storedName   String     @unique @map("stored_name")
+  originalName String     @map("original_name")
+  mimeType     String     @map("mime_type")
+  size         Int
+  sha256       String
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@index([aspirationId])
+  @@map("attachments")
+}
+
+model Reply {
+  id           String     @id @default(cuid())
+  aspirationId String     @map("aspiration_id")
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id], onDelete: Cascade)
+  adminId      String?    @map("admin_id")
+  admin        Admin?     @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  message      String     @db.Text
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@index([aspirationId, createdAt])
+  @@map("replies")
+}
+
+model StatusHistory {
+  id           String            @id @default(cuid())
+  aspirationId String            @map("aspiration_id")
+  aspiration   Aspiration        @relation(fields: [aspirationId], references: [id], onDelete: Cascade)
+  fromStatus   AspirationStatus? @map("from_status")
+  toStatus     AspirationStatus  @map("to_status")
+  // Catatan internal, tidak ditampilkan ke siswa
+  note         String?
+  adminId      String?           @map("admin_id")
+  admin        Admin?            @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  createdAt    DateTime          @default(now()) @map("created_at")
+
+  @@index([aspirationId, createdAt])
+  @@map("status_history")
+}
+
+model ModerationLog {
+  id           String           @id @default(cuid())
+  aspirationId String           @map("aspiration_id")
+  aspiration   Aspiration       @relation(fields: [aspirationId], references: [id], onDelete: Cascade)
+  adminId      String?          @map("admin_id")
+  admin        Admin?           @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  source       ModerationSource
+  decision     ModerationStatus
+  score        Float?
+  reasons      Json?
+  note         String?
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  @@index([aspirationId, createdAt])
+  @@map("moderation_logs")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String?  @map("admin_id")
+  admin      Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  action     String
+  targetType String?  @map("target_type")
+  targetId   String?  @map("target_id")
+  meta       Json?
+  ip         String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([action])
+  @@index([adminId, createdAt])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
