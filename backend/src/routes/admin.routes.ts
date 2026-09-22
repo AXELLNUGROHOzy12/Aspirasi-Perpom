@@ -6,7 +6,7 @@ import { requireAuth, requireRole } from '../middleware/auth';
 import { requireXhrHeader } from '../middleware/csrf';
 import { loginLimiter } from '../middleware/rateLimit';
 import { validate } from '../middleware/validate';
-import { idParam, listQuerySchema, loginSchema, moderateBody, replyBody, settingsBody, statusBody } from '../validators/admin.validator';
+import { idParam, listQuerySchema, loginSchema, maintenanceBody, moderateBody, replyBody, settingsBody, statusBody } from '../validators/admin.validator';
 import { reorderBody, teacherIdParam, toggleBody } from '../validators/favoriteTeacher.validator';
 import { teacherPhotoUpload } from '../services/teacherPhoto.service';
 
@@ -30,6 +30,8 @@ router.post('/aspirations/:id/moderate', validate(idParam, 'params'), validate(m
 router.delete('/aspirations/:id', requireRole('SUPER_ADMIN'), validate(idParam, 'params'), admin.remove);
 router.get('/attachments/:id/download', validate(idParam, 'params'), admin.downloadAttachment);
 router.put('/settings', requireRole('SUPER_ADMIN'), validate(settingsBody), admin.saveSettings);
+router.get('/maintenance', admin.maintenanceStatus);
+router.put('/maintenance', canManage, validate(maintenanceBody), admin.toggleMaintenance);
 
 // Guru Favorit: kelola guru, aktif/nonaktifkan, dan lihat hasil
 router.get('/favorite-teacher', ft.overview);

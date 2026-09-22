@@ -84,7 +84,10 @@ export default function FavoriteTeacherWidget() {
       const d = dragRef.current;
       dragRef.current = null;
       if (!d) return;
-      if (d.moved) {
+      const dx = e.clientX - d.startX;
+      const dy = e.clientY - d.startY;
+      const netMoved = Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD;
+      if (netMoved) {
         setPos((current) => {
           if (current) window.localStorage.setItem(POS_KEY, JSON.stringify(current));
           return current;

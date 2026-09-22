@@ -6,6 +6,7 @@ export interface PublicSettings {
   schoolName: string;
   classes: string[];
   categories: { slug: string; name: string }[];
+  maintenanceMode: boolean;
   turnstileSiteKey: string | null;
   upload: { maxFiles: number; maxSizeBytes: number; allowedExtensions: string[] };
 }

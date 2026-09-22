@@ -36,3 +36,5 @@ export const settingsBody = z.object({
     .max(80)
     .refine((list) => new Set(list).size === list.length, 'Nama kelas tidak boleh ada yang sama.'),
 });
+
+export const maintenanceBody = z.object({ active: z.boolean() });

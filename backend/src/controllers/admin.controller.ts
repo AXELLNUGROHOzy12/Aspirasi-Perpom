@@ -2,7 +2,7 @@ import fs from 'fs';
 import { prisma } from '../lib/prisma';
 import { writeAudit } from '../services/audit.service';
 import * as svc from '../services/adminAspiration.service';
-import { updateSettings } from '../services/settings.service';
+import { getMaintenanceMode, setMaintenanceMode, updateSettings } from '../services/settings.service';
 import { uploadPath } from '../services/upload.service';
 import { asyncHandler } from '../utils/asyncHandler';
 import { notFound } from '../utils/httpError';
@@ -73,4 +73,14 @@ export const saveSettings = asyncHandler(async (req, res) => {
   await updateSettings(req.body as { schoolName: string; classes: string[] });
   await writeAudit(req, 'SETTINGS_UPDATED', { meta: { classes: (req.body as { classes: string[] }).classes.length } });
   res.json({ data: { ok: true } });
+});
+
+export const maintenanceStatus = asyncHandler(async (_req, res) => {
+  res.json({ data: { active: await getMaintenanceMode() } });
+});
+
+export const toggleMaintenance = asyncHandler(async (req, res) => {
+  const active = await setMaintenanceMode((req.body as { active: boolean }).active);
+  await writeAudit(req, 'MAINTENANCE_TOGGLED', { meta: { active } });
+  res.json({ data: { active } });
 });

@@ -5,10 +5,25 @@ import { submitLimiter, trackLimiter, voteLimiter } from '../middleware/rateLimi
 import { uploadMiddleware } from '../services/upload.service';
 import { validate } from '../middleware/validate';
 import { teacherIdParam } from '../validators/favoriteTeacher.validator';
+import { asyncHandler } from '../utils/asyncHandler';
+import { HttpError } from '../utils/httpError';
+import { getMaintenanceMode } from '../services/settings.service';
 
 const router = Router();
 
+// /settings tetap bisa diakses saat maintenance supaya frontend tahu harus menampilkan halaman maintenance.
 router.get('/settings', ctrl.settings);
+
+// Saat maintenance aktif, semua aksi publik lain diblokir di level API juga (bukan cuma tampilan).
+router.use(
+  asyncHandler(async (_req, _res, next) => {
+    if (await getMaintenanceMode()) {
+      throw new HttpError(503, 'Sistem sedang dalam perbaikan. Coba lagi beberapa saat lagi.', 'MAINTENANCE');
+    }
+    next();
+  }),
+);
+
 // Urutan: rate limit -> parsing multipart -> (controller) validasi, captcha, sanitasi, anti-spam, moderasi, kode, database
 router.post('/aspirations', submitLimiter, uploadMiddleware, ctrl.submit);
 router.get('/aspirations/:code', trackLimiter, ctrl.track);

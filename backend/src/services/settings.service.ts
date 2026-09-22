@@ -14,16 +14,33 @@ export async function getSchoolName(): Promise<string> {
   return typeof row?.value === 'string' ? row.value : env.SCHOOL_NAME;
 }
 
+// Mode maintenance: saat aktif, siswa tidak bisa memakai web (lihat middleware di public.routes.ts).
+export async function getMaintenanceMode(): Promise<boolean> {
+  const row = await prisma.setting.findUnique({ where: { key: 'maintenanceMode' } });
+  return row?.value === true;
+}
+
+export async function setMaintenanceMode(active: boolean) {
+  await prisma.setting.upsert({
+    where: { key: 'maintenanceMode' },
+    create: { key: 'maintenanceMode', value: active },
+    update: { value: active },
+  });
+  return active;
+}
+
 export async function getPublicSettings() {
-  const [schoolName, classes, categories] = await Promise.all([
+  const [schoolName, classes, categories, maintenanceMode] = await Promise.all([
     getSchoolName(),
     getClasses(),
     prisma.category.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' }, select: { slug: true, name: true } }),
+    getMaintenanceMode(),
   ]);
   return {
     schoolName,
     classes,
     categories,
+    maintenanceMode,
     turnstileSiteKey: env.CAPTCHA_SECRET && env.TURNSTILE_SITE_KEY ? env.TURNSTILE_SITE_KEY : null,
     upload: { maxFiles: env.UPLOAD_MAX_FILES, maxSizeBytes: env.UPLOAD_MAX_SIZE, allowedExtensions: ALLOWED_EXTENSIONS },
   };

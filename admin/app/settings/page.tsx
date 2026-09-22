@@ -17,11 +17,24 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [ok, setOk] = useState(false);
+  const [maintenance, setMaintenance] = useState(false);
+  const [togglingMaintenance, setTogglingMaintenance] = useState(false);
 
   useEffect(() => {
     if (admin.role !== 'SUPER_ADMIN') { router.replace('/'); return; }
-    api.get<PublicSettings>('/settings').then((s) => { setSchoolName(s.schoolName); setClasses(s.classes.join('\n')); setLoaded(true); }).catch((e) => setError(errorMessage(e)));
+    api.get<PublicSettings>('/settings').then((s) => { setSchoolName(s.schoolName); setClasses(s.classes.join('\n')); setMaintenance(s.maintenanceMode); setLoaded(true); }).catch((e) => setError(errorMessage(e)));
   }, [admin.role, router]);
+
+  async function toggleMaintenance() {
+    if (togglingMaintenance) return;
+    setTogglingMaintenance(true);
+    setError('');
+    try {
+      const res = await api.put<{ active: boolean }>('/admin/maintenance', { active: !maintenance });
+      setMaintenance(res.active);
+    } catch (e) { setError(errorMessage(e)); }
+    finally { setTogglingMaintenance(false); }
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +53,24 @@ export default function SettingsPage() {
   return (
     <form onSubmit={save} className="max-w-xl space-y-5">
       <h1 className="font-display text-3xl font-bold tracking-tight">Pengaturan</h1>
+
+      <div className="card flex items-center justify-between gap-4">
+        <div>
+          <p className="font-semibold">Mode Maintenance</p>
+          <p className="mt-0.5 text-sm text-muted">
+            {maintenance ? 'Sedang aktif — siswa melihat halaman perbaikan dan tidak bisa memakai web.' : 'Nonaktif — web bisa dipakai siswa seperti biasa.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={toggleMaintenance}
+          disabled={togglingMaintenance}
+          className={maintenance ? 'btn-primary btn-sm shrink-0' : 'btn-outline btn-sm shrink-0'}
+        >
+          {togglingMaintenance ? 'Menyimpan...' : maintenance ? 'Nonaktifkan' : 'Aktifkan'}
+        </button>
+      </div>
+
       <div>
         <label htmlFor="school" className="label">Nama sekolah</label>
         <input id="school" className="input" maxLength={100} value={schoolName} onChange={(e) => setSchoolName(e.target.value)} />
