@@ -30,8 +30,13 @@ export function createApp() {
   app.use(cookieParser());
 
   app.get('/health', (_req, res) => res.json({ ok: true }));
-  app.use('/api', publicRoutes);
+  // Admin harus di-mount duluan: publicRoutes ada di prefix '/api' yang juga
+  // "menangkap" '/api/admin/*', dan middleware maintenance di publicRoutes
+  // (router.use tanpa path) jalan untuk semua request yang lewat situ.
+  // Kalau adminRoutes di-mount belakangan, panel admin ikut ke-block 503
+  // saat maintenance aktif — termasuk endpoint buat mematikannya lagi.
   app.use('/api/admin', adminRoutes);
+  app.use('/api', publicRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
