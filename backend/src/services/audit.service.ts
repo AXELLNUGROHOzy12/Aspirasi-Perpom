@@ -18,7 +18,8 @@ export type AuditAction =
   | 'FAVORITE_TEACHER_CREATED'
   | 'FAVORITE_TEACHER_UPDATED'
   | 'FAVORITE_TEACHER_DELETED'
-  | 'FAVORITE_TEACHER_VOTES_RESET';
+  | 'FAVORITE_TEACHER_VOTES_RESET'
+  | 'MAINTENANCE_TOGGLED';
 
 export async function writeAudit(
   req: Request,
