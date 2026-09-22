@@ -1,10 +1,12 @@
 import fs from 'fs';
+import path from 'path';
 import { createApp } from './app';
 import { env } from './config/env';
 import { prisma } from './lib/prisma';
 import { logger } from './utils/logger';
 
 fs.mkdirSync(env.UPLOAD_DIR, { recursive: true });
+fs.mkdirSync(path.join(env.UPLOAD_DIR, 'teachers'), { recursive: true }); // foto guru favorit
 
 const server = createApp().listen(env.PORT, () => {
   logger.info(`Backend berjalan di http://localhost:${env.PORT} (${env.NODE_ENV})`);

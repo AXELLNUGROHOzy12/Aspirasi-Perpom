@@ -7,52 +7,83 @@
   Ganti --brand di bawah (format "R G B") atau set NEXT_PUBLIC_BRAND_RGB di .env.local.
 */
 :root {
-  --brand: 15 118 110;
-  --bg: 246 248 248;
+  --brand: 29 78 216;
+  --bg: 247 248 250;
   --card: 255 255 255;
-  --ink: 17 24 39;
-  --muted: 92 102 115;
-  --line: 218 224 228;
+  --ink: 15 23 42;
+  --muted: 100 116 139;
+  --line: 226 232 240;
   color-scheme: light;
 }
 
 .dark {
-  --bg: 10 15 20;
-  --card: 19 27 34;
-  --ink: 236 241 244;
-  --muted: 152 164 175;
-  --line: 44 56 66;
+  --bg: 11 15 25;
+  --card: 20 27 40;
+  --ink: 241 245 249;
+  --muted: 148 163 184;
+  --line: 38 48 66;
   color-scheme: dark;
 }
 
 @layer base {
   html { -webkit-text-size-adjust: 100%; }
-  body { @apply bg-bg text-ink antialiased; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+  body { @apply bg-bg text-ink antialiased; font-family: var(--font-jakarta), system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; }
   a, button, label, select { -webkit-tap-highlight-color: transparent; }
-  .font-display { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif; }
+  .font-display { font-family: var(--font-jakarta), system-ui, sans-serif; letter-spacing: -0.02em; }
 }
 
 @layer components {
-  .card { @apply rounded-2xl border border-line bg-card p-4 sm:p-6; }
+  .card { @apply rounded-2xl border border-line/70 bg-card p-4 shadow-sm shadow-slate-900/5 sm:p-6; }
   .btn {
-    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold transition
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-bg
       disabled:cursor-not-allowed disabled:opacity-60;
   }
-  .btn-primary { @apply btn bg-brand text-white hover:brightness-110 active:brightness-95; }
+  .btn-primary { @apply btn bg-brand text-white shadow-sm hover:brightness-110 active:brightness-95; }
   .btn-outline { @apply btn border border-line bg-card text-ink hover:border-brand hover:text-brand; }
   .btn-danger { @apply btn border border-rose-300 bg-card text-rose-700 hover:bg-rose-50 dark:border-rose-500/40 dark:text-rose-300 dark:hover:bg-rose-500/10; }
   .btn-sm { @apply min-h-10 px-4 text-sm; }
   .input {
-    @apply block min-h-12 w-full rounded-xl border border-line bg-card px-4 py-3 text-base text-ink placeholder:text-muted
+    @apply block min-h-12 w-full rounded-xl border border-line bg-card px-4 py-3 text-[15px] text-ink placeholder:text-muted
       focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 disabled:opacity-60;
   }
   .label { @apply mb-1.5 block text-sm font-semibold; }
   .field-error { @apply mt-1.5 text-sm text-rose-700 dark:text-rose-300; }
   .chip { @apply inline-flex min-h-10 items-center rounded-full border border-line bg-card px-4 text-sm font-medium text-ink transition; }
   .chip-active { @apply border-brand bg-brand text-white; }
+  .nav-link { @apply flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-muted transition hover:bg-brand/10 hover:text-brand; }
+  .nav-link-active { @apply bg-brand/10 text-brand; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Widget "Guru Favorit" — badge mengambang yang bisa digeser bebas oleh siswa */
+@keyframes ft-pop-in {
+  from { transform: scale(0.4) translateX(-8px); opacity: 0; }
+  to { transform: scale(1) translateX(0); opacity: 1; }
+}
+@keyframes ft-ring {
+  0% { box-shadow: 0 0 0 0 rgb(var(--brand) / 0.45); }
+  100% { box-shadow: 0 0 0 14px rgb(var(--brand) / 0); }
+}
+@keyframes ft-sparkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.85) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.1) rotate(12deg); }
+}
+@keyframes ft-sheet-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.ft-badge { animation: ft-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.ft-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  animation: ft-ring 2.2s ease-out infinite;
+  pointer-events: none;
+}
+.ft-sparkle { animation: ft-sparkle 1.8s ease-in-out infinite; }
+.ft-sheet { animation: ft-sheet-in 0.25s ease-out both; }

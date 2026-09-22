@@ -9,6 +9,7 @@ const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.ts'],
   theme: {
     extend: {
+      fontFamily: { sans: ['var(--font-jakarta)', 'system-ui', 'sans-serif'] },
       colors: {
         brand: rgb('brand'),
         bg: rgb('bg'),

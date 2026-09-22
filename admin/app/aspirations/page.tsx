@@ -6,6 +6,7 @@ import Alert from '@/components/Alert';
 import { ModerationBadge, StatusBadge } from '@/components/Badges';
 import EmptyState from '@/components/EmptyState';
 import Spinner from '@/components/Spinner';
+import { IconSearch } from '@/components/Icons';
 import { api, errorMessage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { STATUS_INFO, STATUS_ORDER } from '@/lib/labels';
@@ -56,12 +57,15 @@ export default function AspirationListPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="font-display text-3xl font-bold tracking-tight">Daftar Aspirasi</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Daftar Aspirasi</h1>
 
       <label htmlFor="search" className="sr-only">Cari aspirasi</label>
-      <input id="search" className="input" placeholder="🔍 Cari kode, judul, isi, atau kelas..." value={search} onChange={(e) => setSearch(e.target.value)} />
+      <div className="relative">
+        <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-muted"><IconSearch size={18} /></span>
+        <input id="search" className="input pl-11" placeholder="Cari kode, judul, isi, atau kelas..." value={search} onChange={(e) => setSearch(e.target.value)} />
+      </div>
 
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
         <button type="button" className={`chip shrink-0 ${filters.status === '' ? 'chip-active' : ''}`} onClick={() => update({ status: '' })}>Semua</button>
         {STATUS_ORDER.map((s) => (
           <button key={s} type="button" className={`chip shrink-0 ${filters.status === s ? 'chip-active' : ''}`} onClick={() => update({ status: s })}>{STATUS_INFO[s].label}</button>
@@ -124,7 +128,7 @@ export default function AspirationListPage() {
           ) : (
             <>
               <p className="mb-3 text-sm text-muted">{data.total} aspirasi</p>
-              <ul className="space-y-3">
+              <ul className="space-y-3 md:hidden">
                 {data.items.map((a) => (
                   <li key={a.id} className="card !p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -141,6 +145,41 @@ export default function AspirationListPage() {
                   </li>
                 ))}
               </ul>
+              <div className="card hidden overflow-x-auto !p-0 md:block">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-line/70 text-xs uppercase tracking-wide text-muted">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold">Kode</th>
+                      <th className="px-3 py-3 font-semibold">Judul</th>
+                      <th className="px-3 py-3 font-semibold">Kategori</th>
+                      <th className="px-3 py-3 font-semibold">Kelas</th>
+                      <th className="px-3 py-3 font-semibold">Tanggal</th>
+                      <th className="px-3 py-3 font-semibold">Status</th>
+                      <th className="px-5 py-3 text-right font-semibold"><span className="sr-only">Aksi</span></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line/60">
+                    {data.items.map((a) => (
+                      <tr key={a.id} className="transition hover:bg-brand/5">
+                        <td className="whitespace-nowrap px-5 py-3.5 font-mono text-xs text-muted">{a.code}</td>
+                        <td className="max-w-[18rem] px-3 py-3.5">
+                          <Link href={`/aspirations/${a.id}`} className="line-clamp-1 font-semibold hover:text-brand">{a.title}</Link>
+                          {(a._count.replies > 0 || a._count.attachments > 0) && (
+                            <span className="text-xs text-muted">{a._count.replies > 0 && `${a._count.replies} balasan`}{a._count.replies > 0 && a._count.attachments > 0 && ' · '}{a._count.attachments > 0 && `${a._count.attachments} lampiran`}</span>
+                          )}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-3.5">{a.category.name}</td>
+                        <td className="whitespace-nowrap px-3 py-3.5">{a.className}</td>
+                        <td className="whitespace-nowrap px-3 py-3.5 text-muted">{formatDate(a.createdAt)}</td>
+                        <td className="px-3 py-3.5">
+                          <div className="flex flex-wrap gap-1.5"><StatusBadge status={a.status} />{a.moderationStatus !== 'APPROVED' && <ModerationBadge status={a.moderationStatus} />}</div>
+                        </td>
+                        <td className="px-5 py-3.5 text-right"><Link href={`/aspirations/${a.id}`} className="btn-outline btn-sm">Detail</Link></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <div className="mt-5 flex items-center justify-between gap-3">
                 <button type="button" className="btn-outline btn-sm" disabled={data.page <= 1 || loading} onClick={() => setFilters((f) => ({ ...f, page: f.page - 1 }))}>‹ Sebelumnya</button>
                 <span className="text-sm text-muted">Halaman {data.page} dari {data.totalPages}</span>

@@ -104,6 +104,8 @@ Kode contoh untuk `/lacak` (dari data dummy): `ASP-20260915-K7M2QX`.
 
 **Umum**: mobile-first, dark mode, loading dan empty state, error berbahasa Indonesia tanpa detail teknis.
 
+**Guru Favorit** (opsional, default nonaktif): badge mengambang di pojok kiri halaman siswa, bisa digeser bebas dan posisinya diingat per perangkat. Siswa memilih satu guru (foto + nama), satu suara per perangkat, tanpa ada tulisan "event" yang terlihat siswa. Admin (`SUPER_ADMIN`/`ADMIN`) mengelola dari menu **Guru Favorit**: aktif/nonaktifkan kapan saja, tambah/ubah/sembunyikan/hapus guru beserta fotonya, urutkan tampilan, lihat hasil suara real-time, dan reset suara untuk membuka polling baru (`SUPER_ADMIN`).
+
 ## Teknologi
 
 Next.js 14 + React + TypeScript + Tailwind (web dan admin); Node.js + Express + TypeScript + Zod (backend); PostgreSQL + Prisma; bcryptjs (cost 12), JWT di cookie httpOnly, helmet, CORS, express-rate-limit, Cloudflare Turnstile.
@@ -129,6 +131,9 @@ Publik
 - `GET /api/settings`
 - `POST /api/aspirations` (multipart)
 - `GET /api/aspirations/:code`
+- `GET /api/favorite-teacher?voterId=` — status badge + daftar guru aktif
+- `POST /api/favorite-teacher/vote` — `{ teacherId, voterId }`, satu kali per `voterId`
+- `GET /api/favorite-teacher/photo/:id` — foto guru (publik, cache 1 hari)
 
 Admin (butuh login, request yang mengubah data wajib header `X-Requested-With: aspirasi`)
 - `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/me`
@@ -141,6 +146,13 @@ Admin (butuh login, request yang mengubah data wajib header `X-Requested-With: a
 - `DELETE /api/admin/aspirations/:id` (SUPER_ADMIN)
 - `GET /api/admin/attachments/:id/download`
 - `PUT /api/admin/settings` (SUPER_ADMIN)
+- `GET /api/admin/favorite-teacher` — daftar guru + jumlah & persentase suara
+- `PUT /api/admin/favorite-teacher/toggle` — `{ active }`
+- `POST /api/admin/favorite-teacher/teachers` (multipart: `name`, `photo`)
+- `PATCH /api/admin/favorite-teacher/teachers/:id` (multipart, semua field opsional)
+- `DELETE /api/admin/favorite-teacher/teachers/:id` (SUPER_ADMIN)
+- `PATCH /api/admin/favorite-teacher/reorder` — `{ order: string[] }`
+- `POST /api/admin/favorite-teacher/reset-votes` (SUPER_ADMIN)
 
 ## Keamanan
 

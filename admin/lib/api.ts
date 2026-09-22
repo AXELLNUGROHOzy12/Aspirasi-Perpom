@@ -37,8 +37,8 @@ const body = (data: unknown) => (data === undefined ? undefined : JSON.stringify
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, data?: unknown) => request<T>(path, { method: 'POST', body: data instanceof FormData ? data : body(data) }),
-  patch: <T>(path: string, data?: unknown) => request<T>(path, { method: 'PATCH', body: body(data) }),
-  put: <T>(path: string, data?: unknown) => request<T>(path, { method: 'PUT', body: body(data) }),
+  patch: <T>(path: string, data?: unknown) => request<T>(path, { method: 'PATCH', body: data instanceof FormData ? data : body(data) }),
+  put: <T>(path: string, data?: unknown) => request<T>(path, { method: 'PUT', body: data instanceof FormData ? data : body(data) }),
   del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
 

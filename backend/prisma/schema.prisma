@@ -182,3 +182,35 @@ model Setting {
 
   @@map("settings")
 }
+
+// Fitur "Guru Favorit": polling foto+nama guru, bisa diaktif/nonaktifkan admin lewat Setting (key: favoriteTeacherActive)
+model Teacher {
+  id                String   @id @default(cuid())
+  name              String
+  photoStored       String   @map("photo_stored")
+  photoOriginalName String   @map("photo_original_name")
+  photoMimeType     String   @map("photo_mime_type")
+  isActive          Boolean  @default(true) @map("is_active")
+  sortOrder         Int      @default(0) @map("sort_order")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  votes TeacherVote[]
+
+  @@index([isActive, sortOrder])
+  @@map("favorite_teachers")
+}
+
+model TeacherVote {
+  id        String   @id @default(cuid())
+  teacherId String   @map("teacher_id")
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  // Token acak per-perangkat (localStorage), bukan akun. Unik supaya satu perangkat = satu suara.
+  voterId   String   @unique @map("voter_id")
+  ipHash    String?  @map("ip_hash")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([teacherId])
+  @@index([ipHash, createdAt])
+  @@map("favorite_teacher_votes")
+}

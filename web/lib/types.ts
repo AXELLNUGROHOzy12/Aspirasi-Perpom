@@ -44,6 +44,13 @@ export interface AspirationDetail {
   moderationLogs: { id: string; source: 'AUTO' | 'ADMIN'; decision: ModerationStatus; score: number | null; reasons: string[] | null; note: string | null; createdAt: string; admin: { name: string } | null }[];
 }
 
+export interface FavoriteTeacherPublic {
+  active: boolean;
+  teachers: { id: string; name: string }[];
+  alreadyVoted: boolean;
+  votedTeacherId: string | null;
+}
+
 export interface Statistics {
   total: number; pending: number; reviewing: number; inProgress: number; resolved: number; archived: number; needsReview: number;
   byCategory: { name: string; count: number }[];
